@@ -1,0 +1,116 @@
+Design Document: tpt-teleop-agri (Precision Agriculture & Autonomous Farming)
+Version: 1.0.0 (v1 Monolithic Release)
+Date: August 26, 2026
+Status: Approved for Development
+Sister Repositories: tpt-teleop, tpt-teleop-fleet
+(Note: Moving forward, all domain-specific crates will use the simplified tpt-t- prefix for brevity and cleaner namespace management on crates.io.)
+1. Executive Summary
+tpt-t-agri is the hyper-optimized, zero-bloat, Rust-based middleware workspace designed to automate the most complex, hostile, and massive-scale environment on Earth: the open farm.
+While tpt-teleop-fleet handles the micro-meter precision of indoor warehouses, tpt-t-agri handles the macro-hectare scale of outdoor agriculture. It orchestrates autonomous tractors, combine harvesters, precision spray drones, and grain carts. It processes real-time RTK GPS, decodes heavy industrial ISOBUS (ISO 11783) protocols, calculates multi-spectral crop health indices on the edge, and coordinates multi-vehicle swarms—all while strictly adhering to our zero-allocation, MIT-only, no-Tokio performance philosophy.
+2. Licensing & Dependency Policy
+Project License: MIT OR Apache-2.0.
+Dependency Policy: Strictly enforces the MIT/BSD/ISC chain. cargo-deny rejects any Apache-only dependencies. Dual-licensed crates are resolved strictly under MIT.
+3. Workspace Architecture (The Crates)
+The repository is structured as a Cargo Workspace. Every crate uses the simplified tpt-t-agri- prefix.
+Core & Navigation
+tpt-t-agri-core: The central event loop, field state machine, and lock-free message bus.
+tpt-t-agri-nav: Outdoor navigation. Handles RTK GPS (100Hz raw corrections), IMU fusion, outdoor visual/LiDAR SLAM, and automated headland turning logic.
+tpt-t-agri-isobus: The tractor's nervous system. A custom, zero-allocation parser for ISOBUS (ISO 11783) over CAN bus. Handles Virtual Terminals (VT), Task Controllers (TC), and implement telemetry without heavy XML parsing on the edge.
+Environment & Biological Assets
+tpt-t-agri-env: Micro-climate and weather integration. Reads wind speed/direction, soil moisture probes, and rain sensors to dynamically adjust machinery speed and spray nozzles.
+tpt-t-agri-crop: Biological asset management. Processes multi-spectral camera data on the edge to calculate NDVI (Normalized Difference Vegetation Index) in real-time using SIMD instructions, driving variable-rate application (VRA) controllers.
+Swarm & Logistics
+tpt-t-agri-swarm: Multi-vehicle coordination. The brain behind "unloading on the go." Synchronizes the kinematics of a combine harvester with a grain cart and a semi-truck, ensuring zero downtime during harvest.
+tpt-t-agri-logistics: Grain bin management, silo fill-level estimation, and automated routing of grain carts to the nearest dump hopper based on real-time mass flow sensor data.
+Edge Runtime & Safety
+tpt-t-agri-edge: The lightweight, no_std path executor for the tractor/combine. Translates high-level AB-line paths into low-level hydraulic proportional valve commands.
+tpt-t-agri-safety: The local "reflex" arc. Handles ROPS (Rollover Protection System) monitoring, PTO (Power Take-Off) safety interlocks, and immediate emergency stops if a human is detected in the implement zone.
+4. Extreme Performance Tactics (Agri-Specific)
+Farming requires processing massive amounts of sensor data in dusty, vibrating, GPS-challenged environments without relying on cloud connectivity.
+4.1. Zero-Allocation ISOBUS (ISO 11783)
+Standard ISOBUS Task Controllers rely on heavy XML parsing for task definitions and massive allocations for telemetry logging.
+The Solution: tpt-t-agri-isobus features a custom, streaming CAN-bus parser. It reads raw J1939/ISOBUS frames and maps them directly into rkyv structs. When exporting data to the farm management software (via USB or cellular), it uses a custom zero-allocation XML generator that writes directly to the file buffer, bypassing the heap entirely.
+4.2. SIMD-Accelerated Multi-Spectral Processing
+Drones and tractor-mounted cameras generate massive amounts of multi-spectral data (Red, Green, Blue, Near-Infrared).
+The Solution: tpt-t-agri-crop uses Rust's portable-simd to calculate NDVI and other vegetation indices directly on the raw Bayer sensor data in memory. It processes 4K multi-spectral frames in <2 milliseconds per frame, allowing the tractor to instantly adjust its spray nozzles row-by-row without waiting for cloud processing.
+4.3. Sub-Millisecond Swarm Kinematics
+When a combine harvester is unloading into a grain cart while both are moving at 10 mph, their relative distance must be maintained within inches.
+The Solution: tpt-t-agri-swarm uses the tpt-t-radio mesh network to share raw wheel encoder and RTK GPS data via a lock-free MPSC ring buffer. The kinematic sync loop runs on a dedicated, pinned CPU core, calculating relative velocity and steering adjustments in <500 microseconds.
+4.4. RTK GPS & RTCM3 Parsing
+High-precision farming requires decoding 100Hz RTCM3 correction frames from the base station.
+The Solution: We wrote a custom, zero-copy RTCM3 parser. It validates the CRC24Q checksums and extracts the carrier-phase measurements directly into the navigation filter's memory space, avoiding the overhead of standard GNSS middleware.
+5. The "Precision Ag" Feature Matrix (v1)
+5.1. Autonomous Guidance & Implement Control
+AB-Line & Curve Guidance: Sub-2cm RTK guidance for straight rows and adaptive curve following around irregular field boundaries.
+Section Control: Automatically turns individual nozzle sections or planter row units off in <50 milliseconds when overlapping previously sprayed/planted areas, saving up to 15% on chemical/seed costs.
+Variable Rate Application (VRA): Reads prescription maps on the fly. Adjusts hydraulic down-pressure on planter row units and seed population based on real-time soil type and topography.
+5.2. Harvest Logistics (The "Swarm")
+Mass Flow Tracking: The combine continuously calculates its grain yield and moisture content.
+Predictive Cart Routing: tpt-t-agri-swarm calculates exactly when the combine's grain tank will be full. It automatically dispatches the nearest grain cart, calculating the intercept vector so the cart matches the combine's speed perfectly for a continuous, moving unload.
+Silo Management: The grain cart automatically routes to the correct farm silo based on the moisture content and crop type of the load it is carrying.
+5.3. Hostile Environment Survival
+Dust & Vibration Filtering: Software-based Kalman filters specifically tuned to reject the high-frequency noise of diesel engines and the low-frequency drift of heavy tracks on soft soil.
+Offline-First Architecture: The tractor can operate for 12 hours in a field with zero cellular coverage. All telemetry, yield maps, and as-applied data are logged to local NVMe via O_DIRECT. The moment the tractor crosses the farm's WiFi boundary, it syncs the rkyv buffers to the cloud.
+6. The Complete "Autonomous Harvest" Data Flow
+The Field: The farm manager uploads a "Harvest Prescription Map" to the cloud.
+The Sync: The Combine Harvester powers on in the field. It connects to the local farm mesh via tpt-t-agri-nav. It downloads the prescription map and syncs its RTK base station corrections.
+The Execution: The harvester begins moving. tpt-t-agri-isobus reads the raw CAN data from the header (reel speed, ground speed).
+The Biological Feedback: tpt-t-agri-crop processes the near-infrared camera feed. It detects a patch of crop with high moisture. It instantly sends a zero-copy command via the ring buffer to the ISOBUS Task Controller to reduce the rotor speed and adjust the fan speed to prevent grain damage.
+The Swarm: The combine's mass flow sensor indicates the tank is 85% full. tpt-t-agri-swarm calculates the intercept. It sends a path to the autonomous grain cart.
+The Handoff: The grain cart pulls alongside. tpt-t-agri-swarm locks their relative kinematics. The combine opens the unloading auger. Both vehicles maintain a exact 1.5-meter distance at 8 mph through a dusty, GPS-shadowed area near a tree line, relying on local LiDAR and wheel encoders.
+The Log: Once the cart is full, it detaches. tpt-t-agri-edge logs the exact GPS coordinates and yield data to the local NVMe drive. The cart drives to the semi-truck dump hopper, while the combine continues uninterrupted.
+7. Dependency Matrix (The "No-Bloat" Stack)
+Functionality
+Standard Ecosystem (Banned/Avoided)
+tpt-t-agri Custom / Lightweight Choice
+License
+ISOBUS / CAN
+Heavy C++ ISOBUS libraries, socketcan wrappers
+Custom zero-alloc J1939/ISO11783 CAN parser
+MIT
+RTK / GNSS
+Heavy RTKLIB wrappers, serde for RTCM
+Custom zero-copy RTCM3 parser, raw NMEA
+MIT
+Image Processing
+image crate (heavy allocations), OpenCV
+Custom SIMD Bayer-to-NDVI pipeline
+MIT
+Serialization
+serde, bincode
+rkyv (Zero-copy)
+MIT
+IPC / Telemetry
+tokio::sync, crossbeam
+Custom tpt-teleop-ring (Lock-free SPSC/MPSC)
+MIT
+Hydraulic Control
+Heavy robotics frameworks
+Direct PWM/DAC register access via tpt-t-agri-edge
+MIT
+Math / Kinematics
+nalgebra
+std::simd (portable-simd) + custom kinematics
+MIT
+8. Developer Experience & Simulation
+Testing autonomous tractors requires land, fuel, and heavy machinery. tpt-t-agri solves this with a massive, physics-accurate simulation environment.
+tpt-t-agri-sim: A headless simulator that models soil mechanics (slip, sinkage), crop resistance, diesel engine torque curves, and hydraulic lag. It can simulate a 50-vehicle harvest swarm across a 5,000-acre virtual field at 100x real-time speed.
+Visualizer: A lightweight egui (MIT) binary that renders the 3D terrain, crop health heatmaps (NDVI), and the exact kinematic paths of the swarm, allowing developers to tune the swarm intercept algorithms without leaving the office.
+9. Conclusion
+tpt-t-agri v1 brings the same uncompromising, zero-bloat, MIT-only philosophy of the tpt ecosystem to the largest, most unstructured physical environment on the planet.
+By writing custom, zero-allocation parsers for ISOBUS and RTK GPS, utilizing SIMD for on-the-fly multi-spectral processing, and coordinating multi-vehicle swarms via lock-free ring buffers, tpt-t-agri proves that you don't need heavy, cloud-dependent, or Apache-encumbered middleware to run a fully autonomous, precision farm. It is a battle-ready, commercially unencumbered operating system for the future of global agriculture.
+
+tpt-t-agri → tpt-teleop Integration
+Adapter Crate: tpt-t-agri-teleop (new crate in the agri repo)
+Integration Flow:
+An autonomous tractor gets stuck in mud or encounters an unmapped obstacle.
+tpt-t-agri-safety detects the stall and triggers tpt-t-agri-teleop::request_teleop_assistance().
+tpt-teleop establishes a low-latency video link (the farmer is in the cab of a nearby truck with a tablet).
+The farmer uses the tablet's virtual joystick to control the tractor.
+tpt-t-agri-teleop receives ControlCommand and translates it into ISOBUS implement commands (e.g., "raise the plow," "engage PTO," "drive forward at 2 km/h").
+The tractor is extricated.
+Control returns to autonomy.
+Domain-Specific Adaptation:
+ISOBUS Translation: The adapter translates joystick inputs into CAN bus messages for the tractor's hydraulic valves and implement controllers.
+Implement Control: The operator can control not just the tractor's movement, but also the implement (e.g., raise/lower the plow, adjust spray nozzles).
+GPS-Denied Recovery: If the tractor is in a GPS-denied area (e.g., under a tree canopy), the teleop system provides visual guidance via the video feed.

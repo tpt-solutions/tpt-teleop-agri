@@ -1,0 +1,63 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+# `tpt-t-agri-crop` requires nightly (`#![feature(portable_simd)]`) and is
+# excluded from the default stable workspace build. Its dedicated nightly CI
+# job builds it in isolation (see `.github/workflows/ci.yml`). It still inherits
+# workspace metadata via `package.workspace = ".."`.
+exclude = ["crates/tpt-t-agri-crop"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+authors = ["TPT Solutions"]
+repository = "https://github.com/tpt-solutions/tpt-teleop-agri"
+homepage = "https://tpt.solutions/tpt-teleop-agri"
+documentation = "https://docs.rs/tpt-t-agri-core"
+
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "warn"
+
+[workspace.lints.clippy]
+undocumented_unsafe_blocks = "warn"
+
+[workspace.dependencies]
+# Internal crates
+tpt-t-agri-core = { path = "crates/tpt-t-agri-core" }
+tpt-t-agri-nav = { path = "crates/tpt-t-agri-nav" }
+tpt-t-agri-isobus = { path = "crates/tpt-t-agri-isobus" }
+tpt-t-agri-env = { path = "crates/tpt-t-agri-env" }
+tpt-t-agri-crop = { path = "crates/tpt-t-agri-crop" }
+tpt-t-agri-safety = { path = "crates/tpt-t-agri-safety" }
+tpt-t-agri-edge = { path = "crates/tpt-t-agri-edge" }
+tpt-t-agri-swarm = { path = "crates/tpt-t-agri-swarm" }
+tpt-t-agri-logistics = { path = "crates/tpt-t-agri-logistics" }
+tpt-t-agri-teleop = { path = "crates/tpt-t-agri-teleop" }
+tpt-t-agri-sim = { path = "crates/tpt-t-agri-sim" }
+
+# Platform (all dual MIT OR Apache-2.0 — see deny.toml MIT-chain policy).
+# Members gate these behind [target.'cfg(...)'.dependencies] as needed;
+# deny.toml audits them on every CI target regardless of host OS.
+libc = "0.2"
+io-uring = "0.7"
+rkyv = { version = "0.8", features = ["bytecheck"] }
+windows-sys = { version = "0.60", features = [
+    "Win32_Foundation",
+    "Win32_System_IO",
+    "Win32_System_Threading",
+    "Win32_System_SystemInformation",
+    "Win32_Storage_FileSystem",
+    "Win32_Devices_HumanInterfaceDevice",
+    "Win32_Security",
+] }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+debug = true
+
+[profile.bench]
+inherits = "release"

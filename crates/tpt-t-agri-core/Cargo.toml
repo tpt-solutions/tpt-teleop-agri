@@ -1,0 +1,22 @@
+[package]
+name = "tpt-t-agri-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Field state machine, lock-free message bus, central event loop, and zero-copy rkyv wire prelude for tpt-teleop-agri"
+
+[dependencies]
+rkyv = { workspace = true, features = ["bytecheck"] }
+bytecheck = "0.8"
+
+[target.'cfg(unix)'.dependencies]
+libc = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true }
+
+[lints]
+workspace = true

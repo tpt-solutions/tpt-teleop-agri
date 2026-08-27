@@ -1,0 +1,8 @@
+[toolchain]
+# Default to stable. The whole workspace builds on stable except
+# `tpt-t-agri-crop`, which requires a nightly toolchain for
+# `#![feature(portable_simd)]`. That crate carries its own
+# `rust-toolchain.toml` (crate-local override) and is built by a dedicated
+# nightly-only CI job; see `.github/workflows/ci.yml`.
+channel = "stable"
+components = ["rustfmt", "clippy"]

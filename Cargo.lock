@@ -290,6 +290,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tpt-t-agri-nav"
+version = "0.1.0"
+dependencies = [
+ "bytecheck",
+ "libc",
+ "rkyv",
+ "tpt-t-agri-core",
+ "windows-sys",
+]
+
+[[package]]
 name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -53,14 +53,14 @@ integration contract).
 - [x] Zero-lock hot-path audit passes (reuse `tools/lock-audit.sh` pattern)
 
 ## Phase 3 — `tpt-t-agri-nav`
-- [ ] Custom zero-copy RTCM3 parser (CRC24Q validation, carrier-phase extraction),
+- [x] Custom zero-copy RTCM3 parser (CRC24Q validation, carrier-phase extraction),
        100Hz RTK correction ingestion
-- [ ] Raw NMEA parsing
-- [ ] IMU fusion / Kalman filtering tuned for diesel-engine vibration + soft-soil
+- [x] Raw NMEA parsing
+- [x] IMU fusion / Kalman filtering tuned for diesel-engine vibration + soft-soil
       track drift
 - [ ] Outdoor visual/LiDAR SLAM for GPS-shadowed areas (tree lines, etc.)
-- [ ] AB-line & curve guidance (sub-2cm target)
-- [ ] Automated headland turning logic
+- [x] AB-line & curve guidance (sub-2cm target)
+- [x] Automated headland turning logic
 - [ ] Benchmarks against sub-2cm guidance accuracy target
 
 ## Phase 4 — `tpt-t-agri-isobus`

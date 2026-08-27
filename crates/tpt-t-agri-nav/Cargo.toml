@@ -1,0 +1,23 @@
+[package]
+name = "tpt-t-agri-nav"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "RTCM3/RTK parsing, IMU fusion, AB-line/curve guidance, and headland turns for tpt-teleop-agri"
+
+[dependencies]
+tpt-t-agri-core = { workspace = true }
+rkyv = { workspace = true, features = ["bytecheck"] }
+bytecheck = "0.8"
+
+[target.'cfg(unix)'.dependencies]
+libc = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true }
+
+[lints]
+workspace = true

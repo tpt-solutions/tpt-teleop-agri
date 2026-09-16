@@ -58,10 +58,10 @@ integration contract).
 - [x] Raw NMEA parsing
 - [x] IMU fusion / Kalman filtering tuned for diesel-engine vibration + soft-soil
       track drift
-- [ ] Outdoor visual/LiDAR SLAM for GPS-shadowed areas (tree lines, etc.)
+- [x] Outdoor visual/LiDAR SLAM for GPS-shadowed areas (tree lines, etc.)
 - [x] AB-line & curve guidance (sub-2cm target)
 - [x] Automated headland turning logic
-- [ ] Benchmarks against sub-2cm guidance accuracy target
+- [x] Benchmarks against sub-2cm guidance accuracy target
 
 ## Phase 4 — `tpt-t-agri-isobus`
 - [ ] Zero-allocation streaming CAN-bus parser for J1939/ISOBUS (ISO 11783) frames

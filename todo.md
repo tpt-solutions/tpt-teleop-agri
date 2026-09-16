@@ -29,20 +29,20 @@ integration contract).
 - [x] `docs/quickstart.md` stub
 
 ## Phase 1 — Cross-Repo Bridge: `tpt-t-domain-bridge` (lives in `tpt-teleop` repo)
-- [ ] New crate `tpt-t-domain-bridge` under `tpt-teleop/crates/`
-- [ ] Define `DomainTeleopInterface` (DTI) trait: `on_teleop_engage`,
+- [x] New crate `tpt-t-domain-bridge` under `tpt-teleop/crates/`
+- [x] Define `DomainTeleopInterface` (DTI) trait: `on_teleop_engage`,
       `on_teleop_disengage`, `on_control_command`, `get_domain_state`,
       `get_sensor_feed`
-- [ ] Define wire types with `rkyv::Archive`: `ControlCommand`, `InputState`,
+- [x] Define wire types with `rkyv::Archive`: `ControlCommand`, `InputState`,
       `SensorFeed`, `DomainState`, `DomainTelemetry`, `HapticCmd`/`HapticFeedback`
-- [ ] Reconcile with existing 56-byte POD `ControlCommand` in
+- [x] Reconcile with existing 56-byte POD `ControlCommand` in
       `tpt-t-core/src/ser/cmd.rs` (bridge spec flags this as an intentional,
       unreconciled discrepancy — resolve or document the mapping)
-- [ ] Universal safety state machine: `AUTONOMOUS → REQUESTING_TELEOP →
+- [x] Universal safety state machine: `AUTONOMOUS → REQUESTING_TELEOP →
       TELEOP_ACTIVE → RETURNING_TO_AUTONOMY → AUTONOMOUS`, plus `EMERGENCY_STOP`
       transitions
-- [ ] `request_teleop_assistance()` API surface
-- [ ] Unit tests + doc examples; publish path so `tpt-t-agri-teleop` can depend on it
+- [x] `request_teleop_assistance()` API surface
+- [x] Unit tests + doc examples; publish path so `tpt-t-agri-teleop` can depend on it
       (path dep during co-development)
 
 ## Phase 2 — `tpt-t-agri-core`

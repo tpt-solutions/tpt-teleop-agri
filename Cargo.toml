@@ -27,6 +27,7 @@ undocumented_unsafe_blocks = "warn"
 # Internal crates
 tpt-t-agri-core = { path = "crates/tpt-t-agri-core" }
 tpt-t-agri-nav = { path = "crates/tpt-t-agri-nav" }
+tpt-t-domain-bridge = { path = "crates/tpt-t-domain-bridge" }
 tpt-t-agri-isobus = { path = "crates/tpt-t-agri-isobus" }
 tpt-t-agri-env = { path = "crates/tpt-t-agri-env" }
 tpt-t-agri-crop = { path = "crates/tpt-t-agri-crop" }

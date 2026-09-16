@@ -44,10 +44,16 @@ crates/
 
 ## Cross-repo bridge
 
-`Phase 1` lives in the `tpt-teleop` repo as `tpt-t-domain-bridge`. During
-co-development, depend on it via a path dependency:
+`Phase 1` is `tpt-t-domain-bridge`. Its canonical home is the `tpt-teleop`
+repo (every domain repo depends on it); during co-development it is vendored
+in this workspace at `crates/tpt-t-domain-bridge` so domain crates use a
+plain path dependency:
 
 ```toml
 [dependencies]
-tpt-t-domain-bridge = { path = "../tpt-teleop/crates/tpt-t-domain-bridge" }
+tpt-t-domain-bridge = { workspace = true }
 ```
+
+When `tpt-teleop` publishes the bridge, switch the dependency over — the
+public API (DTI trait, wire types, safety state machine, assist API) is the
+stable contract.

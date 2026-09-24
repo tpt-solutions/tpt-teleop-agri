@@ -38,3 +38,5 @@ Thumbs.db
 
 safe.log
 
+# tpt-weave working state
+/.tpt-weave/
